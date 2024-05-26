@@ -12,7 +12,7 @@ function aplicarDescuento(precioTotal){
 function calcularPrecioFinal(){
     const precioBase = parseFloat(document.getElementById('precioBase').value);
 
-    if (isNaN(precioBase) || precioBase <= 0){
+    if (Number.isNaN(precioBase) || precioBase <= 0){
         document.getElementById('resultado').textContent = 'Por favor, ingrese un precio valido';
         return;
     }
@@ -21,12 +21,15 @@ function calcularPrecioFinal(){
     const precioConIVA = precioBase + iva;
 
     let precioFinal;
+    let mensajeValor;
 
     if (precioConIVA > 200000){
         precioFinal = aplicarDescuento(precioConIVA);
+        mensajeValor = "Precio final de las zapatillas + IVA con descuento = $"
     } else {
         precioFinal = precioConIVA;
+        mensajeValor = "Precio final de las zapatillas + IVA = $"
     }
 
-    document.getElementById('resultado').textContent = `El precio final de las zapatillas con IVA y descuento es de $${precioFinal.toFixed(2)}`;
+    document.getElementById('resultado').textContent = `${mensajeValor}${precioFinal.toFixed(2)}`;
 }
