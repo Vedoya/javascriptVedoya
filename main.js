@@ -8,9 +8,17 @@ class Zapatillas{
 
     elegirMarca(){
         let marcaElegida;
+        const marcasMinusculas = this.marcas.map(marca => marca.toLowerCase());
+
         do{
-            marcaElegida = prompt(`Escriba una marca de zapatillas:\n${this.marcas.join('\n')}`);
+            marcaElegida = prompt(`Elija una marca de zapatillas:\n${this.marcas.join('\n')}`).toLowerCase();
+            if(marcasMinusculas.includes(marcaElegida)) {
+                marcaElegida = this.marcas[marcasMinusculas.indexOf(marcaElegida)];
+            }else{
+                alert('Por favor, ingrese una marca válida');
+            }
         }while(!this.marcas.includes(marcaElegida));
+
         return marcaElegida;
     }
 
@@ -37,10 +45,10 @@ class Zapatillas{
         let mensajeValor;
         if(precioConIVA > 200000){
             precioFinal = this.aplicarDescuento(precioConIVA);
-            mensajeValor = "Precio final de las zapatillas + IVA con descuento = $";
+            mensajeValor = `Precio final de las zapatillas ${marcaElegida} + IVA con descuento = $`;
         }else{
             precioFinal = precioConIVA;
-            mensajeValor = "Precio final de las zapatillas + IVA = $";
+            mensajeValor = `Precio final de las zapatillas ${marcaElegida} + IVA = $`;
         }
         console.log(`${mensajeValor}${precioFinal.toFixed(2)}`);
         alert(`${mensajeValor}${precioFinal.toFixed(2)}`);
