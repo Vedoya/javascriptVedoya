@@ -30,7 +30,7 @@ class Zapatillas{
                 alert('Por favor, ingrese un precio valido');
             }
         }
-
+        
         console.log(`Precio ingresado: ${this.precioBase}`);
         
         const iva = this.calcularIVA();
@@ -53,6 +53,8 @@ class Zapatillas{
     }
 }
 
-console.log('Calculando precio final');
-const zapatillas = new Zapatillas(0, 0.21, 0.1);
-zapatillas.calcularPrecioFinal();
+function calcularPrecioFinal(){
+    console.log('Calculando precio final');
+    const zapatillas = new Zapatillas(0, 0.21, 0.1);
+    zapatillas.calcularPrecioFinal();
+}
