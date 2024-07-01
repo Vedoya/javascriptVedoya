@@ -27,72 +27,71 @@ const zapatillas = [
     new Zapatilla('New Balance', '990', 160000)
 ];
 
-const solicitarCantidad = () =>{
-    let cantidad;
-    let valorValido = false;
-    while(!valorValido){
-        cantidad = parseInt(prompt('Ingrese la cantidad de zapatillas que desea comprar:'));
-        if(!isNaN(cantidad) && cantidad > 0){
-            valorValido = true;
-        }else{
-            alert('Por favor, ingrese una cantidad válida');
-        }
-    }
-    return cantidad;
-};
-
-const elegirZapatilla = () =>{
-    let marcaElegida;
-    do{
-        marcaElegida = prompt(`Elija una marca de zapatillas:\n${marcas.join('\n')}`).toLowerCase();
-        marcaElegida = marcas.find(marca => marca.toLowerCase() === marcaElegida);
-        if(!marcaElegida){
-            alert('Por favor, ingrese una marca válida');
-        }
-    }while(!marcaElegida);
-
-    const zapatillasDeMarca = zapatillas.filter(z => z.marca === marcaElegida);
-    const zapatillaElegida = zapatillasDeMarca[Math.floor(Math.random() * zapatillasDeMarca.length)];
-
-    return zapatillaElegida;
-};
-
 const calcularImpuestos = (precioBase) =>{
     return impuestos.reduce((total, impuesto) =>{
-        const montoImpuesto = precioBase * impuesto.tasa;
-        console.log(`Calculando ${impuesto.nombre}: $${montoImpuesto.toFixed(2)}`);
-        return total + montoImpuesto;
+        return total + (precioBase * impuesto.tasa);
     }, 0);
 };
 
 const aplicarDescuento = (precioTotal, descuento) =>{
-    const montoDescuento = precioTotal * descuento;
-    const precioConDescuento = precioTotal - montoDescuento;
-    console.log(`Aplicando descuento de ${descuento * 100}%: $${precioConDescuento.toFixed(2)}`);
-    return precioConDescuento;
+    return precioTotal - (precioTotal * descuento);
 };
 
-const calcularPrecioFinal = () =>{
-    console.log('Calculando precio final');
-    const cantidad = solicitarCantidad();
-    const zapatillaElegida = elegirZapatilla();
-    console.log(`Zapatilla elegida: ${zapatillaElegida.marca} ${zapatillaElegida.modelo}`);
-
-    const impuestosCalculados = calcularImpuestos(zapatillaElegida.precioBase);
-    const precioConImpuestos = zapatillaElegida.precioBase + impuestosCalculados;
-    console.log(`Precio con impuestos: $${precioConImpuestos.toFixed(2)}`);
-
-    let precioFinal;
-    let mensajeValor;
-    const descuento = 0.1;
-    if(precioConImpuestos > 200000){
-        precioFinal = aplicarDescuento(precioConImpuestos, descuento);
-        mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos y descuento = $`;
-    }else{
-        precioFinal = precioConImpuestos;
-        mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos = $`;
-    }
-    const precioTotalCantidad = precioFinal * cantidad;
-    console.log(`${mensajeValor}${precioTotalCantidad.toFixed(2)}`);
-    alert(`${mensajeValor}${precioTotalCantidad.toFixed(2)}`);
-};
+document.addEventListener('DOMContentLoaded', () =>{
+    const saludoMensajes = [
+        "¡Bienvenido a nuestra tienda de zapatillas!",
+        "Disponible las mejores marcas de zapatillas"
+    ];
+    
+    const saludoMensaje = document.getElementById('saludoMensaje');
+    saludoMensaje.textContent = saludoMensajes[Math.floor(Math.random() * saludoMensajes.length)];
+    
+    const zapasCont = document.getElementById('zapasCont');
+    zapatillas.forEach(zapatilla =>{
+        const zapatillaElement = document.createElement('div');
+        zapatillaElement.classList.add('zapatilla');
+        zapatillaElement.innerHTML = `
+            <h3>${zapatilla.marca} ${zapatilla.modelo}</h3>
+            <p>Precio: $${zapatilla.precioBase.toFixed(2)}</p>
+        `;
+        zapasCont.appendChild(zapatillaElement);
+    });
+    
+    const marcaSelec = document.getElementById('marcaSelec');
+    marcas.forEach(marca =>{
+        const option = document.createElement('option');
+        option.value = marca;
+        option.textContent = marca;
+        marcaSelec.appendChild(option);
+    });
+    
+    const formulario = document.getElementById('formulario');
+    formulario.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        const marcaElegida = marcaSelec.value;
+        const cantidad = parseInt(document.getElementById('cantidadSelec').value);
+        
+        const zapatillaElegida = zapatillas.find(z => z.marca === marcaElegida);
+        const impuestosCalculados = calcularImpuestos(zapatillaElegida.precioBase);
+        const precioConImpuestos = zapatillaElegida.precioBase + impuestosCalculados;
+        
+        let precioFinal;
+        let mensajeValor;
+        const descuento = 0.1;
+        if (precioConImpuestos > 300000){
+            precioFinal = aplicarDescuento(precioConImpuestos, descuento);
+            mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos y descuento = $`;
+        }else{
+            precioFinal = precioConImpuestos;
+            mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos = $`;
+        }
+        const precioTotalCantidad = precioFinal * cantidad;
+        
+        const resultadoCompra = document.getElementById('resultadoCompra');
+        resultadoCompra.innerHTML = `
+            <h3>Resumen de la compra:</h3>
+            <p>${mensajeValor}${precioTotalCantidad.toFixed(2)}</p>
+            <p>Cantidad: ${cantidad}</p>
+        `;
+    });
+});
