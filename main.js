@@ -1,8 +1,31 @@
-const impuestos ={
-    iva: 0.21
-};
+class Impuesto{
+    constructor(nombre, tasa){
+        this.nombre = nombre;
+        this.tasa = tasa;
+    }
+}
 
-const marcas = ['Nike', 'Adidas', 'Puma'];
+class Zapatilla{
+    constructor(marca, modelo, precioBase){
+        this.marca = marca;
+        this.modelo = modelo;
+        this.precioBase = precioBase;
+    }
+}
+
+const impuestos = [
+    new Impuesto('IVA', 0.21),
+    new Impuesto('Costo de Servicio', 0.05)
+];
+
+const marcas = ['Nike', 'Adidas', 'Puma', 'New Balance'];
+
+const zapatillas = [
+    new Zapatilla('Nike', 'Air Max', 150000),
+    new Zapatilla('Adidas', 'Ultraboost', 180000),
+    new Zapatilla('Puma', 'RS-X', 130000),
+    new Zapatilla('New Balance', '990', 160000)
+];
 
 const solicitarCantidad = () =>{
     let cantidad;
@@ -18,7 +41,7 @@ const solicitarCantidad = () =>{
     return cantidad;
 };
 
-const elegirMarca = () =>{
+const elegirZapatilla = () =>{
     let marcaElegida;
     do{
         marcaElegida = prompt(`Elija una marca de zapatillas:\n${marcas.join('\n')}`).toLowerCase();
@@ -28,57 +51,46 @@ const elegirMarca = () =>{
         }
     }while(!marcaElegida);
 
-    return marcaElegida;
+    const zapatillasDeMarca = zapatillas.filter(z => z.marca === marcaElegida);
+    const zapatillaElegida = zapatillasDeMarca[Math.floor(Math.random() * zapatillasDeMarca.length)];
+
+    return zapatillaElegida;
 };
 
-const solicitarPrecioBase = () =>{
-    let precioBase;
-    let valorValido = false;
-    while(!valorValido){
-        precioBase = parseFloat(prompt('Ingrese el precio base de las zapatillas:'));
-        if(!isNaN(precioBase) && precioBase > 0){
-            valorValido = true;
-        }else{
-            alert('Por favor, ingrese un precio válido');
-        }
-    }
-    return precioBase;
-};
-
-const calcularIVA = (precioBase) =>{
-    const iva = precioBase * impuestos.iva;
-    console.log(`Calculando IVA: ${iva}`);
-    return iva;
+const calcularImpuestos = (precioBase) =>{
+    return impuestos.reduce((total, impuesto) =>{
+        const montoImpuesto = precioBase * impuesto.tasa;
+        console.log(`Calculando ${impuesto.nombre}: $${montoImpuesto.toFixed(2)}`);
+        return total + montoImpuesto;
+    }, 0);
 };
 
 const aplicarDescuento = (precioTotal, descuento) =>{
     const montoDescuento = precioTotal * descuento;
     const precioConDescuento = precioTotal - montoDescuento;
-    console.log(`Aplicando descuento de ${descuento * 100}%: ${precioConDescuento}`);
+    console.log(`Aplicando descuento de ${descuento * 100}%: $${precioConDescuento.toFixed(2)}`);
     return precioConDescuento;
 };
 
 const calcularPrecioFinal = () =>{
     console.log('Calculando precio final');
     const cantidad = solicitarCantidad();
-    const marcaElegida = elegirMarca();
-    const precioBase = solicitarPrecioBase();
-    console.log(`Precio ingresado: ${precioBase}`);
-    console.log(`Marca elegida: ${marcaElegida}`);
+    const zapatillaElegida = elegirZapatilla();
+    console.log(`Zapatilla elegida: ${zapatillaElegida.marca} ${zapatillaElegida.modelo}`);
 
-    const iva = calcularIVA(precioBase);
-    const precioConIVA = precioBase + iva;
-    console.log(`Precio con IVA: ${precioConIVA}`);
+    const impuestosCalculados = calcularImpuestos(zapatillaElegida.precioBase);
+    const precioConImpuestos = zapatillaElegida.precioBase + impuestosCalculados;
+    console.log(`Precio con impuestos: $${precioConImpuestos.toFixed(2)}`);
 
     let precioFinal;
     let mensajeValor;
     const descuento = 0.1;
-    if(precioConIVA > 200000){
-        precioFinal = aplicarDescuento(precioConIVA, descuento);
-        mensajeValor = `Precio final de las zapatillas ${marcaElegida} + IVA con descuento = $`;
+    if(precioConImpuestos > 200000){
+        precioFinal = aplicarDescuento(precioConImpuestos, descuento);
+        mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos y descuento = $`;
     }else{
-        precioFinal = precioConIVA;
-        mensajeValor = `Precio final de las zapatillas ${marcaElegida} + IVA = $`;
+        precioFinal = precioConImpuestos;
+        mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos = $`;
     }
     const precioTotalCantidad = precioFinal * cantidad;
     console.log(`${mensajeValor}${precioTotalCantidad.toFixed(2)}`);
