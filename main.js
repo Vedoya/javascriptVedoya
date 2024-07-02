@@ -27,15 +27,13 @@ const zapatillas = [
     new Zapatilla('New Balance', '990', 160000)
 ];
 
-const calcularImpuestos = (precioBase) =>{
-    return impuestos.reduce((total, impuesto) =>{
-        return total + (precioBase * impuesto.tasa);
-    }, 0);
-};
+const calcularImpuestos = (precioBase) => impuestos.reduce((total, { tasa }) => total + (precioBase * tasa), 0);
 
-const aplicarDescuento = (precioTotal, descuento) =>{
-    return precioTotal - (precioTotal * descuento);
-};
+const aplicarDescuento = (precioTotal, descuento) => precioTotal - (precioTotal * descuento);
+
+const guardarCarrito = (carrito) => localStorage.setItem('carrito', JSON.stringify(carrito));
+
+const recuperarCarrito = () => JSON.parse(localStorage.getItem('carrito')) || [];
 
 document.addEventListener('DOMContentLoaded', () =>{
     const saludoMensajes = [
@@ -47,23 +45,15 @@ document.addEventListener('DOMContentLoaded', () =>{
     saludoMensaje.textContent = saludoMensajes[Math.floor(Math.random() * saludoMensajes.length)];
     
     const zapasCont = document.getElementById('zapasCont');
-    zapatillas.forEach(zapatilla =>{
-        const zapatillaElement = document.createElement('div');
-        zapatillaElement.classList.add('zapatilla');
-        zapatillaElement.innerHTML = `
-            <h3>${zapatilla.marca} ${zapatilla.modelo}</h3>
-            <p>Precio: $${zapatilla.precioBase.toFixed(2)}</p>
-        `;
-        zapasCont.appendChild(zapatillaElement);
-    });
+    zapasCont.innerHTML = zapatillas.map(({ marca, modelo, precioBase }) => `
+        <div class="zapatilla">
+            <h3>${marca} ${modelo}</h3>
+            <p>Precio: $${precioBase.toFixed(2)}</p>
+        </div>
+    `).join('');
     
     const marcaSelec = document.getElementById('marcaSelec');
-    marcas.forEach(marca =>{
-        const option = document.createElement('option');
-        option.value = marca;
-        option.textContent = marca;
-        marcaSelec.appendChild(option);
-    });
+    marcaSelec.innerHTML = marcas.map(marca => `<option value="${marca}">${marca}</option>`).join('');
     
     const formulario = document.getElementById('formulario');
     formulario.addEventListener('submit', (e) =>{
@@ -72,20 +62,21 @@ document.addEventListener('DOMContentLoaded', () =>{
         const cantidad = parseInt(document.getElementById('cantidadSelec').value);
         
         const zapatillaElegida = zapatillas.find(z => z.marca === marcaElegida);
-        const impuestosCalculados = calcularImpuestos(zapatillaElegida.precioBase);
-        const precioConImpuestos = zapatillaElegida.precioBase + impuestosCalculados;
+        const { marca, modelo, precioBase } = zapatillaElegida;
         
-        let precioFinal;
-        let mensajeValor;
+        const impuestosCalculados = calcularImpuestos(precioBase);
+        const precioConImpuestos = precioBase + impuestosCalculados;
+        
         const descuento = 0.1;
-        if (precioConImpuestos > 300000){
-            precioFinal = aplicarDescuento(precioConImpuestos, descuento);
-            mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos y descuento = $`;
-        }else{
-            precioFinal = precioConImpuestos;
-            mensajeValor = `Precio final de las zapatillas ${zapatillaElegida.marca} ${zapatillaElegida.modelo} con impuestos = $`;
-        }
+        const precioFinal = precioConImpuestos > 300000 
+            ? aplicarDescuento(precioConImpuestos, descuento)
+            : precioConImpuestos;
+        
         const precioTotalCantidad = precioFinal * cantidad;
+        
+        const mensajeValor = precioConImpuestos > 300000
+            ? `Precio final de las zapatillas ${marca} ${modelo} con impuestos y descuento = $`
+            : `Precio final de las zapatillas ${marca} ${modelo} con impuestos = $`;
         
         const resultadoCompra = document.getElementById('resultadoCompra');
         resultadoCompra.innerHTML = `
@@ -93,5 +84,9 @@ document.addEventListener('DOMContentLoaded', () =>{
             <p>${mensajeValor}${precioTotalCantidad.toFixed(2)}</p>
             <p>Cantidad: ${cantidad}</p>
         `;
+
+        const carrito = recuperarCarrito();
+        carrito.push({ marca, modelo, cantidad, precioTotal: precioTotalCantidad });
+        guardarCarrito(carrito);
     });
 });
