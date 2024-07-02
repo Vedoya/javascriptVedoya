@@ -27,13 +27,11 @@ const zapatillas = [
     new Zapatilla('New Balance', '990', 160000)
 ];
 
-const calcularImpuestos = (precioBase) => impuestos.reduce((total, { tasa }) => total + (precioBase * tasa), 0);
+const calcularImpuestos = (precioBase) => 
+    impuestos.reduce((total, {tasa}) => total + (precioBase * tasa), 0);
 
-const aplicarDescuento = (precioTotal, descuento) => precioTotal - (precioTotal * descuento);
-
-const guardarCarrito = (carrito) => localStorage.setItem('carrito', JSON.stringify(carrito));
-
-const recuperarCarrito = () => JSON.parse(localStorage.getItem('carrito')) || [];
+const aplicarDescuento = (precioTotal, descuento) => 
+    precioTotal > 300000 ? precioTotal * (1 - descuento) : precioTotal;
 
 document.addEventListener('DOMContentLoaded', () =>{
     const saludoMensajes = [
@@ -45,15 +43,24 @@ document.addEventListener('DOMContentLoaded', () =>{
     saludoMensaje.textContent = saludoMensajes[Math.floor(Math.random() * saludoMensajes.length)];
     
     const zapasCont = document.getElementById('zapasCont');
-    zapasCont.innerHTML = zapatillas.map(({ marca, modelo, precioBase }) => `
-        <div class="zapatilla">
+    
+    zapatillas.forEach(({marca, modelo, precioBase}) =>{
+        const zapatillaElement = document.createElement('div');
+        zapatillaElement.classList.add('zapatilla');
+        zapatillaElement.innerHTML = `
             <h3>${marca} ${modelo}</h3>
             <p>Precio: $${precioBase.toFixed(2)}</p>
-        </div>
-    `).join('');
+        `;
+        zapasCont.appendChild(zapatillaElement);
+    });
     
     const marcaSelec = document.getElementById('marcaSelec');
-    marcaSelec.innerHTML = marcas.map(marca => `<option value="${marca}">${marca}</option>`).join('');
+    marcas.forEach(marca => {
+        const option = document.createElement('option');
+        option.value = marca;
+        option.textContent = marca;
+        marcaSelec.appendChild(option);
+    });
     
     const formulario = document.getElementById('formulario');
     formulario.addEventListener('submit', (e) =>{
@@ -62,31 +69,36 @@ document.addEventListener('DOMContentLoaded', () =>{
         const cantidad = parseInt(document.getElementById('cantidadSelec').value);
         
         const zapatillaElegida = zapatillas.find(z => z.marca === marcaElegida);
-        const { marca, modelo, precioBase } = zapatillaElegida;
+        const {marca, modelo, precioBase} = zapatillaElegida;
         
         const impuestosCalculados = calcularImpuestos(precioBase);
         const precioConImpuestos = precioBase + impuestosCalculados;
         
         const descuento = 0.1;
-        const precioFinal = precioConImpuestos > 300000 
-            ? aplicarDescuento(precioConImpuestos, descuento)
-            : precioConImpuestos;
-        
+        const precioFinal = aplicarDescuento(precioConImpuestos, descuento);
         const precioTotalCantidad = precioFinal * cantidad;
-        
-        const mensajeValor = precioConImpuestos > 300000
-            ? `Precio final de las zapatillas ${marca} ${modelo} con impuestos y descuento = $`
-            : `Precio final de las zapatillas ${marca} ${modelo} con impuestos = $`;
         
         const resultadoCompra = document.getElementById('resultadoCompra');
         resultadoCompra.innerHTML = `
             <h3>Resumen de la compra:</h3>
-            <p>${mensajeValor}${precioTotalCantidad.toFixed(2)}</p>
+            <p>Precio final de las zapatillas ${marca} ${modelo} ${precioConImpuestos > 300000 ? 'con impuestos y descuento' : 'con impuestos'} = $${precioTotalCantidad.toFixed(2)}</p>
             <p>Cantidad: ${cantidad}</p>
         `;
-
-        const carrito = recuperarCarrito();
-        carrito.push({ marca, modelo, cantidad, precioTotal: precioTotalCantidad });
-        guardarCarrito(carrito);
+        
+        const compra = { marca, modelo, cantidad, precioTotal: precioTotalCantidad };
+        localStorage.setItem('ultimaCompra', JSON.stringify(compra));
     });
+    
+    const ultimaCompra = JSON.parse(localStorage.getItem('ultimaCompra'));
+    if (ultimaCompra){
+        const ultimaCompraElement = document.createElement('div');
+        ultimaCompraElement.innerHTML = `
+            <h3>Última compra:</h3>
+            <p>Marca: ${ultimaCompra.marca}</p>
+            <p>Modelo: ${ultimaCompra.modelo}</p>
+            <p>Cantidad: ${ultimaCompra.cantidad}</p>
+            <p>Precio total: $${ultimaCompra.precioTotal.toFixed(2)}</p>
+        `;
+        document.body.appendChild(ultimaCompraElement);
+    }
 });
