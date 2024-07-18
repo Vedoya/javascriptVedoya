@@ -68,6 +68,15 @@ document.addEventListener('DOMContentLoaded', () =>{
         const marcaElegida = marcaSelec.value;
         const cantidad = parseInt(document.getElementById('cantidadSelec').value);
         
+        if(!marcaElegida || isNaN(cantidad) || cantidad <= 0){
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Por favor, selecciona una marca y una cantidad válida.',
+            });
+            return;
+        }
+        
         const zapatillaElegida = zapatillas.find(z => z.marca === marcaElegida);
         const {marca, modelo, precioBase} = zapatillaElegida;
         
@@ -78,27 +87,33 @@ document.addEventListener('DOMContentLoaded', () =>{
         const precioFinal = aplicarDescuento(precioConImpuestos, descuento);
         const precioTotalCantidad = precioFinal * cantidad;
         
-        const resultadoCompra = document.getElementById('resultadoCompra');
-        resultadoCompra.innerHTML = `
-            <h3>Resumen de la compra:</h3>
-            <p>Precio final de las zapatillas ${marca} ${modelo} ${precioConImpuestos > 300000 ? 'con impuestos y descuento' : 'con impuestos'} = $${precioTotalCantidad.toFixed(2)}</p>
-            <p>Cantidad: ${cantidad}</p>
-        `;
+        Swal.fire({
+            icon: 'success',
+            title: 'Compra realizada',
+            html: `
+                <h3>Resumen de la compra:</h3>
+                <p>Zapatillas: ${marca} ${modelo}</p>
+                <p>Cantidad: ${cantidad}</p>
+                <p>Precio final: $${precioTotalCantidad.toFixed(2)}</p>
+            `,
+            confirmButtonText: 'OK'
+        });
         
         const compra = { marca, modelo, cantidad, precioTotal: precioTotalCantidad };
         localStorage.setItem('ultimaCompra', JSON.stringify(compra));
     });
     
     const ultimaCompra = JSON.parse(localStorage.getItem('ultimaCompra'));
-    if (ultimaCompra){
-        const ultimaCompraElement = document.createElement('div');
-        ultimaCompraElement.innerHTML = `
-            <h3>Última compra:</h3>
-            <p>Marca: ${ultimaCompra.marca}</p>
-            <p>Modelo: ${ultimaCompra.modelo}</p>
-            <p>Cantidad: ${ultimaCompra.cantidad}</p>
-            <p>Precio total: $${ultimaCompra.precioTotal.toFixed(2)}</p>
-        `;
-        document.body.appendChild(ultimaCompraElement);
+    if(ultimaCompra){
+        Swal.fire({
+            title: 'Última compra',
+            html: `
+                <p>Marca: ${ultimaCompra.marca}</p>
+                <p>Modelo: ${ultimaCompra.modelo}</p>
+                <p>Cantidad: ${ultimaCompra.cantidad}</p>
+                <p>Precio total: $${ultimaCompra.precioTotal.toFixed(2)}</p>
+            `,
+            icon: 'info'
+        });
     }
 });
