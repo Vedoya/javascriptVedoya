@@ -1,0 +1,27 @@
+{
+    "zapatillas": [
+        {
+            "marca": "Nike",
+            "modelo": "Air Max",
+            "precioBase": 150000
+        },
+        
+        {
+            "marca": "Adidas",
+            "modelo": "Ultraboost",
+            "precioBase": 180000
+        },
+        
+        {
+            "marca": "Puma",
+            "modelo": "RS-X",
+            "precioBase": 130000
+        },
+        
+        {
+            "marca": "New Balance",
+            "modelo": "990",
+            "precioBase": 160000
+        }
+    ]
+}
